@@ -25,10 +25,10 @@ struct motor {
 };
 
 motor motorArr[4] = {
-  { 10, 11, 45, 0, -1 }, //Motor B (FR)
-  { 8, 9, 135, 0, 1 }, //Motor A (FL)
-  { 3, 4, 45, 0, 1 }, //Motor C (BL)
-  { 5, 6, 135, 0, -1 } //Motor D (BR)
+  { 10, 11, 45, 0, 1 }, //Motor B (FR)
+  { 8, 9, 135, 0, -1 }, //Motor A (FL)
+  { 3, 4, 45, 0, -1 }, //Motor C (BL)
+  { 5, 6, 135, 0, 1 } //Motor D (BR)
   };
 
 int LRval;
@@ -106,7 +106,8 @@ void scale() {
       motorArr[i].force = motorArr[i].force * polar.r/maxForce;
     }
   }
-  for (int i = 0; i < motorArrCount; i++) {
+  //Adding in Turning
+  ;for (int i = 0; i < motorArrCount; i++) {
     motorArr[i].force = motorArr[i].force + polar.turn * motorArr[i].turnMultiplier;
     if (maxTurnForce < abs(motorArr[i].force)) {
       maxTurnForce = abs(motorArr[i].force);
