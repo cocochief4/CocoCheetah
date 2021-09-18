@@ -25,10 +25,10 @@ struct motor {
 };
 
 motor motorArr[4] = {
-  { 11, 10, 45, 0, 1 }, //Motor B (FR)
-  { 9, 8, 135, 0, -1 }, //Motor A (FL)
-  { 4, 3, 45, 0, -1 }, //Motor C (BL)
-  { 6, 5, 135, 0, 1 } //Motor D (BR)
+  { 10, 11, 45, 0, 1 }, //Motor B (FR)
+  { 8, 9, 135, 0, -1 }, //Motor A (FL)
+  { 3, 4, 45, 0, -1 }, //Motor C (BL)
+  { 5, 6, 135, 0, 1 } //Motor D (BR)
   };
 
 int LRval;
@@ -80,7 +80,7 @@ PolarCoord EuclidPolar(int x, int y, int z) {
     r = 1;
   }
   float turnPower = turnCoord/500;
-  if (turnPower < 0.05 || turnPower > -0.05) {
+  if (turnPower < 0.05 && turnPower > -0.05) {
     turnPower = 0;
   }
   PolarCoord coord = { r, theta, turnPower };
