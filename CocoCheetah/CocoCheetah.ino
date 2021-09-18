@@ -25,10 +25,10 @@ struct motor {
 };
 
 motor motorArr[4] = {
-  { 10, 11, 45, 0, 1 }, //Motor B (FR)
-  { 8, 9, 135, 0, -1 }, //Motor A (FL)
-  { 3, 4, 45, 0, -1 }, //Motor C (BL)
-  { 5, 6, 135, 0, 1 } //Motor D (BR)
+  { 11, 10, 45, 0, 1 }, //Motor B (FR)
+  { 9, 8, 135, 0, -1 }, //Motor A (FL)
+  { 4, 3, 45, 0, -1 }, //Motor C (BL)
+  { 6, 5, 135, 0, 1 } //Motor D (BR)
   };
 
 int LRval;
