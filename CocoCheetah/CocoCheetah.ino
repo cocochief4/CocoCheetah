@@ -57,7 +57,7 @@ void loop() {
   FBval = pulseIn(FBpin, HIGH);
   turnVal = pulseIn(turnPin, HIGH);
   polar = EuclidPolar(LRval, FBval, turnVal);
-  MapCoord = String("(") + LRval + "," + FBval + ")";
+  MapCoord = String("(") + LRval + "," + FBval + ")" + " " + turnVal;
   Serial.println(String("Polar Coords: ") + polar.r + ", " + polar.theta);
   Serial.println(MapCoord);
   calcSine();
@@ -80,6 +80,9 @@ PolarCoord EuclidPolar(int x, int y, int z) {
     r = 1;
   }
   float turnPower = turnCoord/500;
+  if (turnPower < 0.05 || turnPower > -0.05) {
+    turnPower = 0;
+  }
   PolarCoord coord = { r, theta, turnPower };
   return coord;
 }
@@ -107,7 +110,7 @@ void scale() {
     }
   }
   //Adding in Turning
-  ;for (int i = 0; i < motorArrCount; i++) {
+  for (int i = 0; i < motorArrCount; i++) {
     motorArr[i].force = motorArr[i].force + polar.turn * motorArr[i].turnMultiplier;
     if (maxTurnForce < abs(motorArr[i].force)) {
       maxTurnForce = abs(motorArr[i].force);
