@@ -10,6 +10,7 @@
 #define DIR_DELAY 1000 // brief delay for abrupt motor changes
 
 #define motorArrCount 4
+#define MAX_MOTOR_SPEED 0.95
 
 struct PolarCoord {
   float r;
@@ -118,7 +119,7 @@ void scale() {
   }
   if (maxTurnForce > 1) {
     for (int i = 0; i < motorArrCount; i++) {
-      motorArr[i].force = motorArr[i].force * 1/maxTurnForce;
+      motorArr[i].force = motorArr[i].force * MAX_MOTOR_SPEED/maxTurnForce;
     }
   }
 }
