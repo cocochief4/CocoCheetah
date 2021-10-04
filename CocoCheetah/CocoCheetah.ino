@@ -117,7 +117,7 @@ void scale() {
       maxTurnForce = abs(motorArr[i].force);
     }
   }
-  if (maxTurnForce > 1) {
+  if (maxTurnForce > MAX_MOTOR_SPEED) {
     for (int i = 0; i < motorArrCount; i++) {
       motorArr[i].force = motorArr[i].force * MAX_MOTOR_SPEED/maxTurnForce;
     }
