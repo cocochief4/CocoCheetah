@@ -3,6 +3,8 @@
 #define LRpin 12
 #define FBpin 13
 #define turnPin 45
+#define pistonInput 7
+#define pistonPin 47
  
 // the actual values for "fast" and "slow" depend on the motor
 #define PWM_SLOW 100  // arbitrary slow speed PWM duty cycle
@@ -35,6 +37,7 @@ motor motorArr[4] = {
 int LRval;
 int FBval;
 int turnVal;
+int pistonVal;
 String MapCoord;
 PolarCoord polar;
 
@@ -49,11 +52,15 @@ void setup() {
   pinMode(LRpin, INPUT);
   pinMode(FBpin, INPUT);
   pinMode(turnPin, INPUT);
+  pinMode(pistonInput, INPUT);
+  pinMode(pistonPin, OUTPUT);
+  digitalWrite(pistonPin, LOW);
   Serial.begin(9600);
   Serial.println("Serial On");
 }
  
 void loop() {
+  pistonVal = pulseIn(pistonPin, HIGH);
   LRval = pulseIn(LRpin, HIGH);
   FBval = pulseIn(FBpin, HIGH);
   turnVal = pulseIn(turnPin, HIGH);
@@ -141,5 +148,13 @@ void motorDrive() {
     }
     analogWrite(motorArr[i].pinPwm, intPWM);
     Serial.println(String("index ") + i + " " + intPWM + " " + motorArr[i].force + " " + motorArr[i].pinDir);
+  }
+}
+
+void pistonDrive(int controller) {
+  if (controller > 1100) {
+    digitalWrite(pistonPin, HIGH);
+  } else {
+    digitalWrite(pistonPin, LOW);
   }
 }
