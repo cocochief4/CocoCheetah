@@ -12,7 +12,7 @@
 #define DIR_DELAY 1000 // brief delay for abrupt motor changes
 
 #define motorArrCount 4
-#define MAX_MOTOR_SPEED 0.95
+#define MAX_MOTOR_SPEED 1
 
 struct PolarCoord {
   float r;
@@ -22,16 +22,17 @@ struct PolarCoord {
 struct motor {
   int a;
   int b;
+  int speedControl;
   float thetaShift;
   float force;
   float turnMultiplier;
 };
 
 motor motorArr[4] = {
-  { 11, 10, 45, 0, -1 }, //Motor B (FR)
-  { 9, 8, 135, 0, 1 }, //Motor A (FL)
-  { 4, 3, 45, 0, 1 }, //Motor C (BL)
-  { 6, 5, 135, 0, -1 } //Motor D (BR)
+  { 22, 23, 2, 45, 0, -1 }, //Motor B (FR)
+  { 24, 25, 3, 135, 0, 1 }, //Motor A (FL)
+  { 26, 27, 4, 45, 0, 1 }, //Motor C (BL)
+  { 28, 29, 5, 135, 0, -1 } //Motor D (BR)
   };
 
 int LRval;
@@ -43,11 +44,20 @@ PolarCoord polar;
 
 void setup() {
   for (int i = 0; i < motorArrCount; i++) {
-    pinMode( motorArr[i].pinDir, OUTPUT );
-    pinMode( motorArr[i].pinPwm, OUTPUT );
-    digitalWrite( motorArr[i].pinDir, LOW );
-    digitalWrite( motorArr[i].pinPwm, LOW );
+    pinMode( motorArr[i].a, OUTPUT );
+    pinMode( motorArr[i].b, OUTPUT );
+    digitalWrite( motorArr[i].a, LOW );
+    digitalWrite( motorArr[i].b, LOW );
   }
+  
+  /*pinMode(enable1A, OUTPUT);
+  pinMode(enable1B, OUTPUT);
+  pinMode(enable2A, OUTPUT);
+  pinMode(enable2B, OUTPUT);
+  digitalWrite(enable1A, HIGH);
+  digitalWrite(enable1B, HIGH);
+  digitalWrite(enable2A, HIGH);
+  digitalWrite(enable2B, HIGH);*/
   
   pinMode(LRpin, INPUT);
   pinMode(FBpin, INPUT);
@@ -63,7 +73,7 @@ void loop() {
   pistonVal = pulseIn(pistonPin, HIGH);
   LRval = pulseIn(LRpin, HIGH);
   FBval = pulseIn(FBpin, HIGH);
-  turnVal = pulseIn(turnPin, HIGH);5
+  turnVal = pulseIn(turnPin, HIGH);
   polar = EuclidPolar(LRval, FBval, turnVal);
   MapCoord = String("(") + LRval + "," + FBval + ")" + " " + turnVal;
   Serial.println(String("Polar Coords: ") + polar.r + ", " + polar.theta);
@@ -131,32 +141,30 @@ void scale() {
   }
 }
 
+
 void motorDrive() {
-  void motorDrive() {
   int intPWM = 0;
   int digitalA = 0;
   int digitalB = 0;
   for (int i = 0; i < motorArrCount; i++)
   {
-    if (motorArr[i].force <= 0)
+    if (motorArr[i].force < 0)
     {
       digitalA = LOW;
       digitalB = HIGH;
-    } else {
+    } else if (motorArr[i].force > 0) {
       digitalA = HIGH;
+      digitalB = LOW;
+    } else {
+      digitalA = LOW;
       digitalB = LOW;
     }
     
   digitalWrite(motorArr[i].a, digitalA);
   digitalWrite(motorArr[i].b, digitalB);
-  if (digitalA ==  LOW)
-  {
-    intPWM = abs(round(motorArr[i].force * 255));
-  } else {
-    intPWM = 255 - abs(round(motorArr[i].force *255));
-  }
-  analogWrite(motorArr[i].pinPwm, intPWM);
-  Serial.println(String("index ") + i + " " + motorArr[i].force + " " + motorarr[i].a);
+  intPWM = abs(round(motorArr[i].force * 255));
+  analogWrite(motorArr[i].speedControl, intPWM);
+  Serial.println(String("index ") + i + " " + motorArr[i].force + " " + digitalA + " " + digitalB + " " + intPWM);
   }
   /*int intPWM = 0;
   int digital = LOW;
@@ -166,14 +174,14 @@ void motorDrive() {
       } else {
       digital = HIGH;
       } 
-    digitalWrite(motorArr[i].pinDir, digital);
+    digitalWrite(motorArr[i].a, digital);
     if (digital == LOW) {
       intPWM = abs(round(motorArr[i].force * 255));
     } else {
       intPWM = 255 - abs(round(motorArr[i].force*255));
     }
-    analogWrite(motorArr[i].pinPwm, intPWM);
-    Serial.println(String("index ") + i + " " + intPWM + " " + motorArr[i].force + " " + motorArr[i].pinDir);
+    analogWrite(motorArr[i].b, intPWM);
+    Serial.println(String("index ") + i + " " + intPWM + " " + motorArr[i].force + " " + motorArr[i].a);
   }*/
 }
 
