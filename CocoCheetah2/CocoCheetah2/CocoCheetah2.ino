@@ -17,8 +17,8 @@ struct PolarCoord {
   float turn;
 };
 struct motor {
-  int pinDir;
-  int pinPwm;
+  int a;
+  int b;
   float thetaShift;
   float force;
   float turnMultiplier;
@@ -121,6 +121,31 @@ void scale() {
 
 void motorDrive() {
   int intPWM = 0;
+  int digitalA = 0;
+  int digitalB = 0;
+  for (int i = 0; i < motorArrCount; i++)
+  {
+    if (motorArr[i].force <= 0)
+    {
+      digitalA = LOW;
+      digitalB = HIGH;
+    } else {
+      digitalA = HIGH;
+      digitalB = LOW;
+    }
+    
+  digitalWrite(motorArr[i].a, digitalA);
+  digitalWrite(motorArr[i].b, digitalB);
+  if (digitalA ==  LOW)
+  {
+    intPWM = abs(round(motorArr[i].force * 255));
+  } else {
+    intPWM = 255 - abs(round(motorArr[i].force *255));
+  }
+  analogWrite(motorArr[i].pinPwm, intPWM);
+  Serial.println(String("index ") + i + " " + motorArr[i].force + " " + motorarr[i].a);
+  }
+  /*int intPWM = 0;
   int digital = LOW;
   for (int i = 0; i < motorArrCount; i++) {
     if (motorArr[i].force <= 0) {
@@ -136,5 +161,5 @@ void motorDrive() {
     }
     analogWrite(motorArr[i].pinPwm, intPWM);
     Serial.println(String("index ") + i + " " + intPWM + " " + motorArr[i].force + " " + motorArr[i].pinDir);
-  }
+  }*/
 }
