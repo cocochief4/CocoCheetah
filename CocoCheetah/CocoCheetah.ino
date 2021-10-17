@@ -9,7 +9,7 @@
 // the actual values for "fast" and "slow" depend on the motor
 #define PWM_SLOW 100  // arbitrary slow speed PWM duty cycle
 #define PWM_FAST 200 // arbitrary fast speed PWM duty cycle
-#define DIR_DELAY 1000 // brief delay for abrupt motor changes
+//#define DIR_DELAY 1000 // brief delay for abrupt motor changes
 
 #define motorArrCount 4
 #define MAX_MOTOR_SPEED 1
@@ -48,6 +48,8 @@ void setup() {
     pinMode( motorArr[i].b, OUTPUT );
     digitalWrite( motorArr[i].a, LOW );
     digitalWrite( motorArr[i].b, LOW );
+    pinMode( motorArr[i].speedControl, OUTPUT );
+    digitalWrite( motorArr[i].speedControl, LOW );
   }
   
   /*pinMode(enable1A, OUTPUT);
@@ -70,7 +72,7 @@ void setup() {
 }
  
 void loop() {
-  pistonVal = pulseIn(pistonPin, HIGH);
+  //pistonVal = pulseIn(pistonInput, HIGH); uncomment if add piston
   LRval = pulseIn(LRpin, HIGH);
   FBval = pulseIn(FBpin, HIGH);
   turnVal = pulseIn(turnPin, HIGH);
