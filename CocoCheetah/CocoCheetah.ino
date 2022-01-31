@@ -1,24 +1,23 @@
+// Copyright 2021 Christopher Kao
+// This is the Arduino program for my robo-soccer car. See it in action at https://www.youtube.com/watch?v=4JXyyVH9lPo.
+// This code designed for Arduino Mega 2560, though a Arduino Mega should work as well.
+// This code allows you to recieve input from a RF recievers and drive a mecanum wheel car.
 #include <math.h>
 
-#define LRpin 12
-#define FBpin 13
-#define turnPin 45
-#define pistonInput 7
-#define pistonPin 47
- 
-// the actual values for "fast" and "slow" depend on the motor
-#define PWM_SLOW 100  // arbitrary slow speed PWM duty cycle
-#define PWM_FAST 200 // arbitrary fast speed PWM duty cycle
-//#define DIR_DELAY 1000 // brief delay for abrupt motor changes
+#define LRpin 12 // Pin for coordinate for the x (left to right) from reciever on car (from 1000 - 2000)
+#define FBpin 13 // Pin for coordinate for the y (forward to backward) from reciever on car (from 1000 - 2000)
+#define turnPin 45 // Pin for value for how far to turn (left to right) from reciever on car (from 1000 - 2000)
+#define pistonInput 7 // kept in here in case added piston, you can ignore
+#define pistonPin 47  // ignore as well
 
-#define motorArrCount 4
-#define MAX_MOTOR_SPEED 1
+#define motorArrCount 4 // Make it easier to change number of motors in case number increases or decreases.
+#define MAX_MOTOR_SPEED 1 // Make it easier to change max speed cap.
 
 struct PolarCoord {
   float r;
   float theta;
   float turn;
-};
+}; // struct to give polar coordinates in one variable
 struct motor {
   int a;
   int b;
@@ -26,19 +25,19 @@ struct motor {
   float thetaShift;
   float force;
   float turnMultiplier;
-};
+}; // struct to give motor specs in one variable
 
 motor motorArr[4] = {
   { 22, 23, 2, 45, 0, -1 }, //Motor B (FR)
   { 24, 25, 3, 135, 0, 1 }, //Motor A (FL)
   { 26, 27, 4, 45, 0, 1 }, //Motor C (BL)
   { 28, 29, 5, 135, 0, -1 } //Motor D (BR)
-  };
+  }; // Array of struct motor
 
-int LRval;
-int FBval;
-int turnVal;
-int pistonVal;
+int LRval; // Acutal value of left-right
+int FBval; // Actual value of forward-backward
+int turnVal; // Actual value of how much to turn
+int pistonVal; // Ignore!!!!
 String MapCoord;
 PolarCoord polar;
 
@@ -50,16 +49,7 @@ void setup() {
     digitalWrite( motorArr[i].b, LOW );
     pinMode( motorArr[i].speedControl, OUTPUT );
     digitalWrite( motorArr[i].speedControl, LOW );
-  }
-  
-  /*pinMode(enable1A, OUTPUT);
-  pinMode(enable1B, OUTPUT);
-  pinMode(enable2A, OUTPUT);
-  pinMode(enable2B, OUTPUT);
-  digitalWrite(enable1A, HIGH);
-  digitalWrite(enable1B, HIGH);
-  digitalWrite(enable2A, HIGH);
-  digitalWrite(enable2B, HIGH);*/
+  } // setup input from controller
   
   pinMode(LRpin, INPUT);
   pinMode(FBpin, INPUT);
@@ -69,7 +59,7 @@ void setup() {
   digitalWrite(pistonPin, LOW);
   Serial.begin(9600);
   Serial.println("Serial On");
-}
+} // more setups
  
 void loop() {
   //pistonVal = pulseIn(pistonInput, HIGH); uncomment if add piston
@@ -83,8 +73,11 @@ void loop() {
   calcSine();
   scale();
   motorDrive();
-}
+} // looping input from controller, constantly recieving input
 
+ // Converts the coordinates recieved from controller to polar coordinates.
+ // The way you find a point in Polar coordinates is with a vector, which is direction and magnitude.
+ // This is exactly what we want, as we want to know which direction the controller wants the robot to go, and how fast.
 PolarCoord EuclidPolar(int x, int y, int z) {
   float LRCoord = x - 1500;
   float FBCoord = y - 1500;
@@ -107,12 +100,15 @@ PolarCoord EuclidPolar(int x, int y, int z) {
   return coord;
 }
 
+// Plots the direction onto a sinewave, showing what the output of each motor should be based on direction.
+// Not relevant, but the sine function is a never ending wave, and this is what leads to triangle ambiguity when using law of sines.
 void calcSine() {
   for (int i = 0; i < motorArrCount; i++) {
     motorArr[i].force = polar.r * sin((polar.theta + motorArr[i].thetaShift)*PI/180);
   }
 }
 
+// Scale the force based on the magnitude of the polar coordinate and scale it so that the maximum power is 1 or lower, depending on how big the magnitude is.
 void scale() {
   float maxForce = 0;
   float maxTurnForce = 0;
@@ -121,9 +117,6 @@ void scale() {
       maxForce = abs(motorArr[i].force);
     }
   }
-  //for (int i = 0; i < motorArrCount; i++) {
-    //motorArr[i].force = motorArr[i].force + polar.turnPower * motorArr[i].turnMultiplier;
-    //}
   if (maxForce > 0) {
     for (int i = 0; i < motorArrCount; i++) {
       motorArr[i].force = motorArr[i].force * polar.r/maxForce;
@@ -143,7 +136,7 @@ void scale() {
   }
 }
 
-
+// Directly controlling the H-Bridge. This is where the motors are moved.
 void motorDrive() {
   int intPWM = 0;
   int digitalA = 0;
@@ -168,25 +161,9 @@ void motorDrive() {
   analogWrite(motorArr[i].speedControl, intPWM);
   Serial.println(String("index ") + i + " " + motorArr[i].force + " " + digitalA + " " + digitalB + " " + intPWM);
   }
-  /*int intPWM = 0;
-  int digital = LOW;
-  for (int i = 0; i < motorArrCount; i++) {
-    if (motorArr[i].force <= 0) {
-      digital = LOW;
-      } else {
-      digital = HIGH;
-      } 
-    digitalWrite(motorArr[i].a, digital);
-    if (digital == LOW) {
-      intPWM = abs(round(motorArr[i].force * 255));
-    } else {
-      intPWM = 255 - abs(round(motorArr[i].force*255));
-    }
-    analogWrite(motorArr[i].b, intPWM);
-    Serial.println(String("index ") + i + " " + intPWM + " " + motorArr[i].force + " " + motorArr[i].a);
-  }*/
 }
 
+// Ignore, this is for the piston we never added.
 void pistonDrive(int controller) {
   if (controller > 1100) {
     digitalWrite(pistonPin, HIGH);
